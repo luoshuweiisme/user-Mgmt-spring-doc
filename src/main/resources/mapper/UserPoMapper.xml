@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.spring.doc.mapper.UserPoMapper">
+    <resultMap id="TenantRespDto" type="com.example.spring.doc.dto.UserRespDto">
+        <id property="userId" column="tenantid"/>
+        <result property="username" column="username"/>
+        <result property="telephone" column="telephonenumber"/>
+        <result property="mailAddress" column="mailaddress"/>
+        <result property="isAllowed" column="isallowed"/>
+        <result property="createTime" column="createtime"/>
+<!--         <collection property="permissions" columnPrefix="permissions_" ofType="org.edgegallery.user.auth.controller.dto.response.RoleDto">
+            <result column="platform" property="platform"/>
+            <result column="role" property="role"/>
+        </collection> -->
+    </resultMap>
+
+<!--     <select id="getRolePoByTenantId" resultType="org.edgegallery.user.auth.db.entity.RolePo">
+        select id, platform, role
+        from tbl_tenant_role a left join tbl_role b on a.roleid = b.id
+        where a.tenantid = #{tenantId}
+    </select> -->
+
+<!--     <select id="getTenantBasicPoData" resultType="org.edgegallery.user.auth.db.entity.TenantPo">
+        SELECT
+        *
+        FROM
+        tbl_tenant
+        WHERE
+        TENANTID=#{tenantId}
+    </select> -->
+
+<!--     <select id="getTenantByTelephone" resultType="org.edgegallery.user.auth.db.entity.TenantPo">
+        SELECT
+        *
+        FROM
+        tbl_tenant
+        WHERE
+        TELEPHONENUMBER=#{telephoneNumber}
+    </select> -->
+
+<!--     <select id="getTenantByMailAddress" resultType="org.edgegallery.user.auth.db.entity.TenantPo">
+        SELECT
+        *
+        FROM
+        tbl_tenant
+        WHERE
+        MAILADDRESS=#{mailAddress}
+    </select> -->
+
+<!--     <select id="getTenantByUsername" resultType="org.edgegallery.user.auth.db.entity.TenantPo">
+        SELECT
+        tenantid,
+        username,
+        password,
+        telephonenumber,
+        mailaddress,
+        isallowed,
+        to_char(createtime, 'YYYY-MM-DD HH24:MI:SS') as createtime
+        FROM
+        tbl_tenant
+        WHERE
+        USERNAME=#{username}
+    </select> -->
+
+<!--     <select id="getTenantByUniqueFlag" resultType="org.edgegallery.user.auth.db.entity.TenantPo">
+        SELECT
+        *
+        FROM
+        tbl_tenant
+        WHERE
+        USERNAME=#{uniqueFlag} or TELEPHONENUMBER=#{uniqueFlag} or MAILADDRESS=#{uniqueFlag}
+    </select> -->
+
+    <insert id="addTenantPo" parameterType="org.edgegallery.user.auth.db.entity.TenantPo">
+        INSERT INTO
+        tbl_tenant
+        (TENANTID, USERNAME, PASSWORD, COMPANY, TELEPHONENUMBER, MAILADDRESS, GENDER, isallowed, CREATETIME, MODIFYTIME, PWEFFECTTIME)
+        VALUES
+        (#{tenantId}, #{username}, #{password}, #{company}, #{telephoneNumber}, #{mailAddress}, #{gender}, #{isAllowed}, now(), now(), now())
+    </insert>
+
+    <delete id="deleteUser" >
+        delete from tbl_tenant where TENANTID = #{tenantId};
+    </delete>
+
+<!--     <update id="modifyPassword">
+        UPDATE
+        tbl_tenant
+        SET PASSWORD = #{param2},
+        PWEFFECTTIME = now()
+        WHERE
+        TENANTID = #{param1};
+    </update> -->
+
+<!--     <select id="getPwEffectTime" resultType="java.lang.String">
+        SELECT PWEFFECTTIME FROM tbl_tenant
+        WHERE USERNAME = #{param1};
+    </select> -->
+
+<!--     <insert id ="insertRolesByTenantId" parameterType="java.util.List" >
+        insert into
+        tbl_tenant_role (tenantid, roleid)
+        values
+        <foreach collection ="param2" item="role" index= "index" separator =",">
+            ( #{param1}, (select id from tbl_role where platform = #{role.platform} and role = #{role.role}))
+        </foreach>
+    </insert> -->
+
+<!--     <select id="queryUserCount" resultType="java.lang.Integer" parameterType="org.edgegallery.user.auth.controller.dto.request.QueryUserReqDto">
+        select count(1) from tbl_tenant
+        <where>
+            <if test="username != null and username != ''">
+                and lower(username) like lower(CONCAT('%', #{username}, '%'))
+            </if>
+            <if test="telephone != null and telephone != ''">
+                and lower(telephonenumber) like lower(CONCAT('%', #{telephone}, '%'))
+            </if>
+            <if test="mailAddress != null and mailAddress != ''">
+                and lower(mailaddress) like lower(CONCAT('%', #{mailAddress}, '%'))
+            </if>
+            <if test="status != -1">
+                and isallowed = (#{status}=1)
+            </if>
+            <if test="role != null and role != 'ALL'">
+                and tenantid in (select distinct tenantid from tbl_tenant_role left join tbl_role on tbl_tenant_role.roleid = tbl_role.id where role=#{role})
+            </if>
+            <if test="createTimeBegin != null and createTimeBegin != ''">
+                <![CDATA[ and createtime >= to_timestamp(#{createTimeBegin}, 'YYYY-MM-DD') ]]>
+            </if>
+            <if test="createTimeEnd != null and createTimeEnd != ''">
+                <![CDATA[ and createtime <= to_timestamp(#{createTimeEnd}, 'YYYY-MM-DD') ]]>
+            </if>
+        </where>
+    </select> -->
+
+    <select id="queryUsers" resultMap="TenantRespDto" parameterType="org.edgegallery.user.auth.controller.dto.request.QueryUserReqDto">
+        select
+        a.tenantid,
+        a.username,
+        a.telephonenumber,
+        a.mailaddress,
+        a.isallowed,
+        to_char(a.createtime, 'YYYY-MM-DD HH24:MI:SS') as createtime,
+        b.platform as permissions_platform,
+        b.role as permissions_role
+        from (
+        select tenantid, username, telephonenumber, mailaddress, isallowed, createtime
+        from tbl_tenant
+        <where>
+            <if test="username != null and username != ''">
+                and lower(username) like lower(CONCAT('%', #{username}, '%'))
+            </if>
+            <if test="telephone != null and telephone != ''">
+                and lower(telephonenumber) like lower(CONCAT('%', #{telephone}, '%'))
+            </if>
+            <if test="mailAddress != null and mailAddress != ''">
+                and lower(mailaddress) like lower(CONCAT('%', #{mailAddress}, '%'))
+            </if>
+            <if test="status != -1">
+                and isallowed = (#{status}=1)
+            </if>
+            <if test="role != null and role != 'ALL'">
+                and tenantid in (select distinct tenantid from tbl_tenant_role left join tbl_role on tbl_tenant_role.roleid = tbl_role.id where role=#{role})
+            </if>
+            <if test="createTimeBegin != null and createTimeBegin != ''">
+                <![CDATA[ and createtime >= to_timestamp(#{createTimeBegin}, 'YYYY-MM-DD') ]]>
+            </if>
+            <if test="createTimeEnd != null and createTimeEnd != ''">
+                <![CDATA[ and createtime <= to_timestamp(#{createTimeEnd}, 'YYYY-MM-DD') ]]>
+            </if>
+        </where>
+        <if test="queryCtrl != null">
+            <if test="queryCtrl.sortBy != null and queryCtrl.sortBy != '' and queryCtrl.sortOrder != null and queryCtrl.sortOrder != ''">
+                order by ${queryCtrl.sortBy} ${queryCtrl.sortOrder}
+            </if>
+            <if test="queryCtrl.offset >=0 and queryCtrl.limit > 0">
+                offset #{queryCtrl.offset} limit #{queryCtrl.limit}
+            </if>
+        </if>
+        ) a left join
+        (select tenantid, platform, role from tbl_tenant_role left join tbl_role on tbl_tenant_role.roleid = tbl_role.id ) b
+        on a.tenantid = b.tenantid
+        <if test="queryCtrl != null and queryCtrl.sortBy != null and queryCtrl.sortBy != '' and queryCtrl.sortOrder != null and queryCtrl.sortOrder != ''">
+            order by ${queryCtrl.sortBy} ${queryCtrl.sortOrder}
+        </if>
+    </select>
+
+<!--     <update id="updateTenantById" parameterType="org.edgegallery.user.auth.controller.dto.response.TenantRespDto">
+        update tbl_tenant
+        set username = #{username}, telephonenumber = #{telephone}, mailaddress = #{mailAddress}, MODIFYTIME = now()
+        where tenantid = #{userId}
+    </update> -->
+
+<!--     <delete id="deleteRolesByTenantId">
+        delete from tbl_tenant_role where tenantid = #{tenantId}
+    </delete> -->
+
+<!--     <update id="updateStatus">
+        UPDATE
+        tbl_tenant
+        SET ISALLOWED = #{param2}
+        WHERE
+        TENANTID = #{param1};
+    </update> -->
+</mapper>
