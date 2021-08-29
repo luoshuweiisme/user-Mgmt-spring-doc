@@ -1,10 +1,11 @@
 package com.example.spring.doc;
 
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-//@MapperScan(basePackages={"com.example.spring.doc.mapper"})
+@MapperScan(basePackages={"com.example.spring.doc.mapper"})
 public class SpringdocOpenapiApplication {
 
     public static void main(String[] args) {

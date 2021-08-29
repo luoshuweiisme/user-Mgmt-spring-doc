@@ -6,11 +6,11 @@ spring:
     name: springdoc-openapi
     
   datasource:
-    url: jdbc:mysql://localhost:3306/tb_user?useUnicode=ture&characterEncoding=UTF-8
+    url: jdbc:mysql://localhost:3306/user_mgmt?useUnicode=ture&characterEncoding=UTF-8
     username: root
     password: 654321
-    driver-class-name:  com.mysql.cj.jdbc.Driver
-    allow-bean-definition-overriding: true   
+    driver-class-name: com.mysql.cj.jdbc.Driver
+#    allow-bean-definition-overriding: true
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
